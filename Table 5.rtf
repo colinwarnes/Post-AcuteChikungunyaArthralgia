@@ -1,0 +1,138 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2639
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 AmericanTypewriter;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww19760\viewh16580\viewkind1
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Table 5. Odds of presenting with chronic chikungunya-associated arthralgia in Managua, Nicaragua (2014-2018).\
+\
+```\{r, Table 5: comparing acute, post-acute, and chronic and Supplemental Table 5\}\
+\
+#Table comparing acute, postacute, and chronic\
+#We will begin by counting the number of instances of reported pain in each phase. \
+#Only consider those with an acute phase report, since that is something we are comparing\
+\
+#Total number of instances\
+painPhases.table <- as.data.frame(table(subset(chikDatos.Unique, daysSinceFever <= 10)$ageRange,useNA = "ifany"))\
+#Instances of acute pain\
+painPhases.table <- cbind(painPhases.table, as.data.frame.matrix(table(subset(chikDatos.Unique, daysSinceFever <= 10)$ageRange,subset(chikDatos.Unique, daysSinceFever <= 10)$acute,useNA = "ifany"))[,2])\
+\
+#Instances of post-acute/interim pain\
+painPhases.table <- cbind(painPhases.table, as.data.frame.matrix(table(subset(chikDatos.Unique, daysSinceFever <= 10)$ageRange,subset(chikDatos.Unique, daysSinceFever <= 10)$post_acute,useNA = "ifany"))[,2])\
+\
+#Instances of chronic pain\
+painPhases.table <- cbind(painPhases.table, as.data.frame.matrix(table(subset(chikDatos.Unique, daysSinceFever <= 10)$ageRange,subset(chikDatos.Unique, daysSinceFever <= 10)$chronic,useNA = "ifany"))[,2])\
+\
+#Here we will condense the table with all the info on each participants classification\
+painPhases.table <- as.data.frame.matrix(painPhases.table)\
+names(painPhases.table) <- c("ageRange","n","acute(1)", "post_acute(1)","chronic(1)")\
+row.names(painPhases.table) <- c(1:4)\
+sum_cols <- rowSums(painPhases.table[,3:5])\
+#The columns were as character so had to make them numeric. I also inclused a "no Pain" column for more info\
+#This data was used as part of Supplemental Table 5\
+painPhases.table <- painPhases.table %>% mutate(`n` = as.numeric(`n`),\
+                                                `acute(1)` = as.numeric(`acute(1)`),\
+                                                `post_acute(1)` = as.numeric(`post_acute(1)`),\
+                                                `chronic(1)` = as.numeric(`chronic(1)`),\
+                                                `no Pain` = n - sum_cols)\
+\
+#Here we are analyzing the difference between age groups among \
+prop.AdultChild <- as.matrix(cbind(painPhases.table[,3],(painPhases.table[,2]-painPhases.table[,3])),col = 2)\
+prop.AdultChild <- rbind(data.frame(t(colSums(prop.AdultChild[1:3,])))\
+                         ,prop.AdultChild[4,])\
+prop.test(as.matrix(prop.AdultChild)) #We see children are not sig diff from adults\
+\
+#Here we are analyzing the difference between age groups among interim\
+prop.AdultChild <- as.matrix(cbind(painPhases.table[,4],(painPhases.table[,2]-painPhases.table[,4])),col = 2)\
+prop.AdultChild <- rbind(data.frame(t(colSums(prop.AdultChild[1:3,])))\
+                         ,prop.AdultChild[4,])\
+prop.test(as.matrix(prop.AdultChild)) #We see children are not sig diff from adults\
+\
+#Here we are analyzing the difference between age groups among the chronic cases\
+prop.AdultChild <- as.matrix(cbind(painPhases.table[,5],(painPhases.table[,2]-painPhases.table[,5])),col = 2)\
+prop.AdultChild <- rbind(data.frame(t(colSums(prop.AdultChild[1:3,])))\
+                         ,prop.AdultChild[4,])\
+prop.test(as.matrix(prop.AdultChild)) #We see children are sig diff from adults\
+\
+#I want to compare the change in cases from the interim to chronic first in adults then children\
+#Here we are analyzing the difference between age groups among the and changes from interim to chronic in children\
+prop.AdultChild <- as.matrix(cbind(painPhases.table[,4],(painPhases.table[,2]-painPhases.table[,4])),col = 2)\
+prop.AdultChild.2 <- as.matrix(cbind(painPhases.table[,5],(painPhases.table[,2]-painPhases.table[,5])),col = 2)\
+prop.AdultChild <- rbind(data.frame(t(colSums(prop.AdultChild[1:3,])))\
+                         ,data.frame(t(colSums(prop.AdultChild.2[1:3,]))))\
+prop.test(as.matrix(prop.AdultChild)) #We see children are sig diff from adults\
+\
+#Here we are analyzing the difference between age groups among the and changes from interim to chronic in adults\
+prop.AdultChild <- as.matrix(cbind(painPhases.table[,4],(painPhases.table[,2]-painPhases.table[,4])),col = 2)\
+prop.AdultChild.2 <- as.matrix(cbind(painPhases.table[,5],(painPhases.table[,2]-painPhases.table[,5])),col = 2)\
+prop.AdultChild <- rbind(prop.AdultChild[4,]\
+                         ,prop.AdultChild.2[4,])\
+prop.test(as.matrix(prop.AdultChild)) #We see children are sig diff from adults\
+\
+\
+\
+#Here we are analyzing the difference between age groups among the post-acute cases\
+#We are observing the combined interim and chronic group - post-acute in the paper\
+prop.AdultChild <- as.matrix(cbind(painPhases.table[,4:5],(painPhases.table[,2]-painPhases.table[,4:5])),col = 2)\
+prop.AdultChild <- cbind(rowSums(prop.AdultChild[,1:2]),(prop.AdultChild[,4]-prop.AdultChild[,1]))\
+prop.AdultChild <- rbind(data.frame(t(colSums(prop.AdultChild[1:3,])))\
+                         ,prop.AdultChild[4,])\
+prop.test(as.matrix(prop.AdultChild)) #We see children are sig diff from adults\
+\
+\
+\
+#This information is required for the text: \
+#"Children had signficantly different proportion of chronic cases when compared to adults"\
+#When we observe the difference between age ranges for the acute phase, here are the results:\
+prop.test(as.matrix(cbind(painPhases.table[,3],(painPhases.table[,2]-painPhases.table[,3])),col = 2)[c(2,4),])\
+prop.test(as.matrix(cbind(painPhases.table[,3],(painPhases.table[,2]-painPhases.table[,3])),col = 2)[c(3,4),])\
+prop.test(as.matrix(cbind(painPhases.table[,3],(painPhases.table[,2]-painPhases.table[,3])),col = 2)[c(1,4),])\
+\
+#When we observe the difference between age ranges for the post-acute phase, here are the results:\
+prop.test(as.matrix(cbind(painPhases.table[,4],(painPhases.table[,2]-painPhases.table[,4])),col = 2)[c(2,4),])\
+prop.test(as.matrix(cbind(painPhases.table[,4],(painPhases.table[,2]-painPhases.table[,4])),col = 2)[c(3,4),])\
+prop.test(as.matrix(cbind(painPhases.table[,4],(painPhases.table[,2]-painPhases.table[,4])),col = 2)[c(1,4),])\
+\
+#When we observe the difference between each specific age range for the chronic phase, here are the results:\
+prop.test(as.matrix(cbind(painPhases.table[,5],(painPhases.table[,2]-painPhases.table[,5])),col = 2)[c(2,4),])\
+prop.test(as.matrix(cbind(painPhases.table[,5],(painPhases.table[,2]-painPhases.table[,5])),col = 2)[c(3,4),])\
+prop.test(as.matrix(cbind(painPhases.table[,5],(painPhases.table[,2]-painPhases.table[,5])),col = 2)[c(1,4),])\
+\
+\
+\
+\
+#The rest of the analysis rounds out Table 3\
+##Acute postacute and chronic Odds\
+#all Ages\
+#Unadjusted\
+tidy(glm(chronic.incl ~ acute.incl, chikDatos.Unique, family = "binomial"), exponentiate = T, conf.int = T)\
+tidy(glm(chronic.incl ~ post_acute.incl, chikDatos.Unique, family = "binomial"), exponentiate = T, conf.int = T)\
+#Adjusted for age (continuous) and sex\
+tidy(glm(chronic.incl ~ acute.incl + ageFever + sex, chikDatos.Unique, family = "binomial"), exponentiate = T, conf.int = T)\
+tidy(glm(chronic.incl ~ post_acute.incl + ageFever + sex, chikDatos.Unique, family = "binomial"), exponentiate = T, conf.int = T)\
+\
+\
+#Children\
+#Unadjusted\
+tidy(glm(chronic.incl ~ acute.incl, subset(chikDatos.Unique, ageRange != "16+"), family = "binomial"), exponentiate = T, conf.int = T)\
+tidy(glm(chronic.incl ~ post_acute.incl, subset(chikDatos.Unique, ageRange != "16+"), family = "binomial"), exponentiate = T, conf.int = T)\
+#Adjusted for age (continuous) and sex\
+tidy(glm(chronic.incl ~ acute.incl + ageFever + sex, subset(chikDatos.Unique, ageRange != "16+"), family = "binomial"), exponentiate = T, conf.int = T)\
+tidy(glm(chronic.incl ~ post_acute.incl + ageFever + sex, subset(chikDatos.Unique, ageRange != "16+"), family = "binomial"), exponentiate = T, conf.int = T)\
+\
+\
+###Using Firth's correction to calculate Odds ratios for adults\
+model.adult <- logistf(chronic.incl ~ acute.incl, data = subset(chikDatos.Unique, ageRange == "16+" ))\
+model.adult.Adj <- logistf(chronic.incl ~ acute.incl + ageFever + sex, data = subset(chikDatos.Unique, ageRange == "16+" ))\
+\
+model.adult.pa <- logistf(chronic.incl ~ post_acute.incl, data = subset(chikDatos.Unique, ageRange == "16+" ))\
+model.adult.pa.Adj <- logistf(chronic.incl ~ post_acute.incl + ageFever + sex, data = subset(chikDatos.Unique, ageRange == "16+" ))\
+\
+# View model summary\
+summary(model.adult)\
+summary(model.adult.Adj)\
+summary(model.adult.pa)\
+summary(model.adult.pa.Adj)\
+\
+```}

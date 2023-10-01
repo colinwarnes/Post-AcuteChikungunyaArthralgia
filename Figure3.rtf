@@ -1,0 +1,144 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2639
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 AmericanTypewriter;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww19760\viewh16580\viewkind1
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Figure 3. Reported polyarthralgia beyond the acute phase of chikungunya associated-arthralgia by body part and age in year in Managua, Nicaragua (2014-2018). (A) Cluster dendrogram depicting the relationship between occurrence of polyarthralgia across the different body parts, with the y-axis representing the underlying cluster distance calculated using the Manhattan distance method. The cophenetic distance correlation coefficient is 0.95; the higher the cophenetic distance correlation coefficient is, the more appropriately the dendrogram represents a hierarchical structure present in the original data. Age trends of the prevalence of arthralgia among clustered body groups (B) and individual body parts (C), including the 95% confidence intervals, visualized using shading corresponding to each respective color group and depicted using a generalized additive model.  \
+\
+```\{r, clusterDedogram Joints \}\
+\
+#I am only keeping the data concerning the joint pains across the body. \
+joint.clust <- chikDatos.Joint%>% ungroup() %>% dplyr::select(neckPain:feetPain)\
+#Changing column names so that they are accurate in the graph\
+names(joint.clust) <- c("Neck", "Shoulders","Elbows","Wrists","Hands","Back","Hips","Knees","Ankles","Feet")\
+#Transforming the dataset to fit the function for a dendogram\
+joint.clust <- t(joint.clust)\
+\
+#Creating the dendogram using the manhattan method + \
+#extracting the cophenetic distance, which reflects how well the groups cluster together. \
+hc.joint.clust <-hclust(dist(joint.clust, method = "manhattan"), method = "ward.D2")\
+d1 <- dist(joint.clust, method = "manhattan")\
+cophenetics <- cophenetic(x = hc.joint.clust)\
+cor(d1,cophenetics)\
+hc.joint.clust <- as.dendrogram(hc.joint.clust,k = 3)\
+dend <- hc.joint.clust\
+\
+plot.new()\
+png(filename = "~/clusterDendogram.png", width = 9, height = 6, units = "in", res = 100, pointsize = 20)\
+dend <- dend %>%\
+         color_branches(k = 3,col = (jointColor[1:3])) \
+dend <- color_labels(dend, k = 3,col = (jointColor[1:3]))\
+plot(dend, main = "Cluster Dendogram for Polyarthralgia")\
+mtext("Manhattan, ward.D2", side = 1, line = 3,padj = 1.3)\
+dev.off()\
+\
+\
+#Remove unnecessary datasets/graphs\
+rm(joint.clust)\
+rm(hc.joint.clust)\
+rm(d1)\
+rm(cophenetics)\
+rm(dend)\
+\
+```\
+\
+```\{r,Figure 3B: Grouped Joint Pain Over Age\}\
+\
+gam.Joints.melt <- chikDatos.Joint %>% dplyr::select("code","ageFever","Torso","Hands","Legs")\
+names(gam.Joints.melt) <- c("code","ageFever","Torso/Elbows","Hands","Legs")\
+gam.Joints.melt <-  melt(gam.Joints.melt, c("code", "ageFever"))\
+\
+gam.Joint.Fig <- gam.Joints.melt%>%\
+  ggplot(aes(x = ageFever, y = value))+\
+  stat_smooth(aes(color = variable, fill = variable),alpha=0.2,\
+              method = "gam", \
+              formula = y ~ s(x, bs = "tp", k = 2), \
+              method.args = list(family = "binomial", method ="REML"), se = TRUE)+\
+  theme_fausto()+\
+  xlab("Age")+\
+  scale_y_continuous(labels = scales::percent)+\
+  ylab("Prevalence of Arthralgia")+\
+  scale_x_continuous(breaks = seq(0,55,5))+\
+  #facet_wrap(~variable)+\
+  theme( legend.title = element_blank())+\
+  scale_color_manual(values = jointColor)+\
+  scale_fill_manual(values = jointColor)\
+\
+#visualize graph\
+gam.Joint.Fig\
+\
+#save graph\
+ggsave(filename = \'93~/gam.Joints.Fig.png",\
+       plot = gam.Joint.Fig,width = 4, height = 6)\
+\
+\
+#Remove unnecessary datasets/graphs\
+rm(gam.Joint.Fig)\
+rm(gam.Joints.melt)\
+\
+``` \
+\
+```\{r,Figure 3C: Individual Joint Pain Over Age\}\
+#I am only keeping the data concerning the joint pains across the body. \
+gam.Joints.melt <- chikDatos.Joint %>% ungroup() %>% dplyr::select("code","ageFever", neckPain:feetPain)\
+#Changing column names so that they are accurate in the graph\
+names(gam.Joints.melt) <- c("code", "ageFever","Neck", "Shoulders","Elbows","Wrists","Hands","Back","Hips","Knees","Ankles","Feet")\
+gam.Joints.melt <-  melt(gam.Joints.melt, c("code", "ageFever"))%>%\
+  dplyr::mutate(value = as.numeric(as.character(value)))\
+\
+\
+allJoints.GAM <- gam.Joints.melt %>%\
+  ggplot(aes(x = ageFever, y = value))+\
+  stat_smooth(aes(color = variable, fill = variable),alpha=0.2,\
+              method = "gam", \
+              formula = y ~ s(x, bs = "tp"), \
+              method.args = list(family = "binomial", method ="REML"), se = TRUE)+\
+  theme_fausto()+\
+  xlab("Age")+\
+  scale_y_continuous(labels = scales::percent)+\
+  ylab("Prevalence of Arthralgia")+\
+  scale_x_continuous(breaks = c(seq(0,55,15)))+\
+  facet_wrap(~variable, nrow = 2)+\
+  theme( legend.title = element_blank(),\
+         axis.text.x = element_text(),\
+         legend.position = "none")+\
+  scale_color_manual(values = c(\
+                      "Neck" = jointColor[1],\
+                     "Shoulders"= jointColor[1],\
+                     "Back"= jointColor[1],\
+                     "Hips" =    jointColor[1],\
+                     "Wrists" =  jointColor[2],\
+                     "Hands" =   jointColor[2],\
+                     "Elbows" =   jointColor[1],\
+                     "Knees" =   jointColor[3],\
+                     "Ankles"=   jointColor[3],\
+                     "Feet" =jointColor[3]\
+                       ))+\
+   scale_fill_manual(values = c(\
+                      "Neck" = jointColor[1],\
+                     "Shoulders"= jointColor[1],\
+                     "Back"= jointColor[1],\
+                     "Hips" =    jointColor[1],\
+                     "Wrists" =  jointColor[2],\
+                     "Hands" =   jointColor[2],\
+                     "Elbows" =   jointColor[1],\
+                     "Knees" =   jointColor[3],\
+                     "Ankles"=   jointColor[3],\
+                     "Feet" =jointColor[3]\
+                       ))\
+\
+#visualize graph\
+allJoints.GAM\
+\
+#save graph\
+ggsave(filename = \'93~/allJoints.gam.Fig.png",\
+       plot = allJoints.GAM, width = 6, height = 4)\
+\
+\
+#Remove unnecessary datasets/graphs\
+rm(allJoints.GAM)\
+rm(gam.Joints.melt)\
+\
+```}

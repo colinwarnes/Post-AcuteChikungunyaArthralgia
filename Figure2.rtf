@@ -1,0 +1,39 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2639
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 AmericanTypewriter;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww19760\viewh16580\viewkind1
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Figure 2. Kaplan-Meier plot showing the proportion of participants reporting arthralgia over time in years in Managua, Nicaragua (2014-2018). A Kaplan-Meier graph plotting the proportion of participants not reporting arthralgia (y-axis) against days since fever onset (x-axis). Ticks correspond to censoring events. Panels show the distribution of participants beginning 10 days post-fever onset and ending at the last reported data point based on the exclusion criteria (< 625 days post-fever onset), stratified by age range (A) and sex (B). The p-values were calculated using the log-rank test.\
+\
+```\{r Figure 2: kaplanMeier Survival Analysis\}\
+\
+###10 Day survival seperated by AgeRanges\
+pain.Survival.10 <- survfit(Surv(daysSinceFever, withPain) ~ ageRange, \
+                            data = painAnalysis.10)\
+plot.new()\
+png(filename = "~/survival10DayPost.png", width = 10, height = 9, units = "in", res = 100, pointsize = 20)\
+plot(pain.Survival.10, col=c(ageGroupsColor[3],ageGroupsColor[1:2],ageGroupsColor[4]), xscale=365.25, lwd=4, mark.time=TRUE,ylim = c(0,1),xlim = c(0,650), xlab="Days Post-Fever Onset", ylab="Percent Not Reporting Arthralgia", conf.int = F,yaxt="n",xaxt="n")\
+axis(2, at=seq(0,1,0.2), labels=paste(seq(0,100,20), "%", sep=""), las=1)\
+axis(1, at=c(10,seq(90,650,90)),labels = c(10,seq(90,650,90)))\
+par(mar = c(2,2,2,2))\
+legend("bottomright", c("0-4","5-9","10-15","16+"),\
+col=ageGroupsColor[1:4], lwd=4, bty='n',title = "Age Range")\
+dev.off()\
+\
+\
+\
+###10 Day survival seperated by Sex\
+pain.Survival.10 <- survfit(Surv(daysSinceFever, withPain) ~ sex, \
+                            data = painAnalysis.10)\
+plot.new()\
+png(\'93~/survival0DayPost.sex.png", \
+    width = 10, height = 9, units = "in", res = 100, pointsize = 20)\
+plot(pain.Survival.10, col=sexPalette,xscale=365.25, lwd=4, mark.time=TRUE,ylim = c(0,1),xlim = c(0,650), xlab="Days Post-Fever Onset", ylab="Percent Not Reporting Arthralgia", conf.int = F,yaxt="n",xaxt="n")\
+axis(2, at=seq(0,1,0.2), labels=paste(seq(0,100,20), "%", sep=""), las=1)\
+axis(1, at=c(10,seq(90,650,90)),labels = c(10,seq(90,650,90)))\
+legend("bottomright", c("Female","Male"), col=sexPalette, lwd=4, bty='n',title = "Patient Sex")\
+dev.off()\
+\
+```}

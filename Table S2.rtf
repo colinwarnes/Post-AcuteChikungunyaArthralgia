@@ -1,0 +1,59 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2639
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 AmericanTypewriter;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww19760\viewh16580\viewkind1
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Supplemental Table 2. Prevalence of post-acute polyarthralgia by age and body part in Managua, Nicaragua (2014-2018).\
+\
+```\{r, Supplemental Table 2\}\
+\
+#Create a table that counts the number of reports of pain in each limb\
+#We will analyze whether the pain is significantly difference between age\
+#Includes that percent with pain as well. \
+\
+count_pain_proportion <- function(df, column_name) \{\
+  # Count the number of instances of 1 (pain) in the specified column\
+  pain_count <- sum(df[[column_name]] == 1, na.rm = TRUE)\
+  # Return a tibble with the count and proportion\
+  tibble(Yes = pain_count, No = (nrow(df) - pain_count), n = nrow(df))\
+\}\
+\
+#All participants\
+all.Ages.JointStats <- count_pain_proportion(chikDatos.Joint,column_name = "Legs")\
+all.Ages.JointStats <- rbind(all.Ages.JointStats,count_pain_proportion(chikDatos.Joint,column_name = "Hands"))\
+all.Ages.JointStats <- rbind(all.Ages.JointStats,count_pain_proportion(chikDatos.Joint,column_name = "Torso"))\
+all.Ages.JointStats\
+\
+print(prop.test(x = t(all.Ages.JointStats[1:3,1])[1:3], \
+                n = t(all.Ages.JointStats[1:3,3])[1:3]))\
+\
+#Pediatric participants <= 15\
+ped.JointStats <- count_pain_proportion(chikDatos.Joint %>% filter(ageRange != "16+"),column_name = "Legs")\
+ped.JointStats <-rbind(ped.JointStats,count_pain_proportion(chikDatos.Joint%>% filter(ageRange != "16+"),column_name = "Hands"))\
+ped.JointStats <-rbind(ped.JointStats,count_pain_proportion(chikDatos.Joint%>% filter(ageRange != "16+"),column_name = "Torso"))\
+ped.JointStats\
+\
+#Difference only hands and legs\
+print(prop.test(x = t(ped.JointStats[1:2,1])[1:2], \
+                n = t(ped.JointStats[1:2,3])[1:2]))\
+#Difference all joints\
+print(prop.test(x = t(ped.JointStats[1:3,1])[1:3], \
+                n = t(ped.JointStats[1:3,3])[1:3]))\
+\
+#Adult participants 15 <\
+adult.JointStats <- count_pain_proportion(chikDatos.Joint %>% filter(ageRange == "16+"),column_name = "Legs")\
+adult.JointStats <-rbind(adult.JointStats,count_pain_proportion(chikDatos.Joint%>% filter(ageRange == "16+"),column_name = "Hands"))\
+adult.JointStats <-rbind(adult.JointStats,count_pain_proportion(chikDatos.Joint%>% filter(ageRange == "16+"),column_name = "Torso"))\
+adult.JointStats\
+\
+#Difference only hands and legs\
+print(prop.test(x = t(adult.JointStats[1:2,1])[1:2], \
+                n = t(adult.JointStats[1:2,3])[1:2]))\
+#Difference all joints\
+print(prop.test(x = t(adult.JointStats[1:2,1])[1:2], \
+                n = t(adult.JointStats[1:2,3])[1:2]))\
+\
+\
+```}

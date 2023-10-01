@@ -1,0 +1,63 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2639
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 AmericanTypewriter;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww19760\viewh16580\viewkind1
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 \
+Table 3. Prevalence of reports of arthralgia in the acute and post-acute phase in Managua, Nicaragua (2014-2018).\
+\
+\pard\pardeftab720\partightenfactor0
+\cf0 Table 4. Proportion of visits with reports of arthralgia in Managua, Nicaragua (2014-2018).\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \
+```\{r, Table 3 and 4: Instances of Acute and Post-Acute pain\}\
+\
+#Create a vector to keep track of those without acute data to remove them from analysis\
+no.Acute.Codes <- chikDatos.Unique %>% filter(daysSinceFever > 10) %>% select(code) %>% pull()\
+\
+#Supplemental Table 1\
+#Here we will calculate the percent of reports of pain that occurred in the post-acute period \
+#This is different than the number of participants reporting pain, because participants will be counted several times\
+painCounting.dataset <- chikDatos %>% filter(!code %in% no.Acute.Codes)\
+countingPainReports<- cbind(as.data.frame.matrix(table((painCounting.dataset%>%filter(exactContactPeriod == 1))$ageRange,\
+      (painCounting.dataset%>%filter(exactContactPeriod == 1))$withPain)),\
+      as.data.frame.matrix(table((painCounting.dataset%>%filter(exactContactPeriod != 1))$ageRange,\
+      (painCounting.dataset%>%filter(exactContactPeriod != 1))$withPain)))\
+countingPainReports <- countingPainReports[,c(2,4)]\
+countingPainReports <- cbind(rowSums(countingPainReports),countingPainReports)\
+\
+names(countingPainReports) <- c(`n`,"acute","post_acute")\
+prop.table(as.matrix(countingPainReports[,2:3]), margin = 1)\
+chisq.test(as.matrix(countingPainReports[c(2,4),,c(2,3)])) #We see children are sig diff from adults\
+chisq.test(as.matrix(countingPainReports[c(3,4),,c(2,3)])) #We see children are sig diff from adults\
+chisq.test(as.matrix(countingPainReports[c(1,4),c(2,3)])) #We see children are sig diff from adults\
+\
+\
+#remove extradataset\
+rm(painCounting.dataset)\
+rm(countingPainReports)\
+\
+\
+#Supplemental Table 2\
+#I will count the number of pain events each person experienced and put them into a table\
+#This will detail how many times an individual experience 0, 1, or 2+ instances of pain\
+\
+#These are the participants without acute stage data, so I will eliminate them from this analysis because it biases the results (more with 0 reports of pain and 1 report (when it could have been 2 if acute data was there))\
+\
+instancesOfPain <- chikDatos %>% filter(!code %in% no.Acute.Codes) %>% \
+  group_by(code) %>%\
+  dplyr::mutate("countPain" = sum(withPain))%>%\
+  distinct(code, .keep_all = T) %>%\
+  dplyr::select(code, ageRange, countPain)%>%\
+  dplyr::mutate(countPain = ifelse(countPain > 2, 2, countPain))\
+\
+table(instancesOfPain$ageRange,instancesOfPain$countPain)\
+prop.table(table(instancesOfPain$ageRange,instancesOfPain$countPain), margin = 1)*100\
+prop.test(table(instancesOfPain$ageRange,instancesOfPain$countPain)[,1:2])\
+prop.test(table(instancesOfPain$ageRange,instancesOfPain$countPain)[,2:3])\
+\
+rm(instancesOfPain)\
+\
+```}

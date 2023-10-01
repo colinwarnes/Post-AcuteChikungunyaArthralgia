@@ -1,0 +1,109 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2639
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 AmericanTypewriter;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red0\green0\blue233;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c0\c0\c93333;}
+\margl1440\margr1440\vieww19760\viewh16580\viewkind1
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs24 \cf2 \expnd0\expndtw0\kerning0
+Figure 4. Age trends in years for the percentage of chikungunya-associated arthralgia cases in each defined phase in Managua, Nicaragua (2014-2018).  Participants were considered as acute (<10 days), interim (>10 days and <90 days), or chronic (>90 days) phase arthralgia cases (A) or considered as either acute (<10 days) or post-acute (>10 days) phase arthralgia cases (B), based on their last instance of arthralgia. Graphs include the 95% confidence intervals, visualized using shading corresponding to each respective color group and depicted using a generalized additive model. The y-axis reflects, out of all participants with reported arthralgia, what percent had their last instance of arthralgia in each given phase. \
+\
+```\{r, Figure4A\}\
+#Figure 4A\
+meltChrChik <- chikDatos.Unique %>% dplyr::select("code","ageFever", "acute", "post_acute", "chronic")\
+meltChrChik <- melt(meltChrChik, c("code","ageFever"))\
+\
+chronicAcuteData <- \
+  meltChrChik %>%\
+ggplot(aes(x = ageFever, y = value, fill = variable, color = variable))+\
+  stat_smooth(aes(fill = variable, color = variable),alpha=0.2,\
+              method = "gam", \
+              formula = y ~ s(x, bs = "tp", k = 1), \
+              method.args = list(family = "binomial", method ="REML"), se = TRUE)+\
+  theme_fausto()+\
+  xlab("Age")+\
+  ylab("Percent in Each Defined Phase")+ \
+  scale_y_continuous(labels = scales::percent, breaks = seq(0,1,.10), limits = c(0,1))+\
+  scale_x_continuous(breaks = seq(0,max(meltChrChik$ageFever),5))+\
+  scale_fill_manual(name = "",\
+                    breaks = c( "acute","post_acute","chronic"), \
+                     values =c(\
+                       "acute" = Dark2[3],\
+                       "post_acute" = Dark2[2],\
+                       "chronic" = Dark2[1]\
+                               ),\
+                     labels = c("chronic" = "Chronic",\
+                               "acute" = "Acute",\
+                               "post_acute" = "Interim"))+\
+  scale_color_manual(name = "",\
+                     breaks = c( "acute","post_acute","chronic"), \
+                     values =c(\
+                       "acute" = Dark2[3],\
+                       "post_acute" = Dark2[2],\
+                       "chronic" = Dark2[1]\
+                               ),\
+                     labels = c("chronic" = "Chronic",\
+                               "acute" = "Acute",\
+                               "post_acute" = "Interim"))\
+  \
+  \
+#visualize graph\
+chronicAcuteData\
+\
+#save graph\
+ggsave(filename = \'93~/chronicAcuteData.Fig.png",\
+       plot = chronicAcuteData,width = 5, height = 5)\
+\
+#Remove unnecessary datasets/graphs\
+rm(chronicAcuteData)\
+rm(meltChrChik)\
+```\
+\
+```\{r, Figure 4B\}\
+##painGAM when looking comparing the post-acute to acute phase (interim + chronic)\
+\
+meltallPostAcuteChik <- chikDatos.Unique %>% dplyr::select("code","ageFever", "acute", "allPostAcute")\
+meltallPostAcuteChik <- melt(meltallPostAcuteChik, c("code","ageFever"))\
+\
+acuteAllChronicGraph <- meltallPostAcuteChik %>%\
+ggplot(aes(x = ageFever, y = value, fill = variable, color = variable))+\
+  stat_smooth(aes(fill = variable, color = variable),alpha=0.2,\
+              method = "gam", \
+              formula = y ~ s(x, bs = "tp", k = 1), \
+              method.args = list(family = "binomial", method ="REML"), se = TRUE)+\
+  theme_fausto()+\
+  xlab("Age")+\
+  ylab("Percent in Each Defined Phase")+ \
+  scale_y_continuous(labels = scales::percent, breaks = seq(0,1,.10), limits = c(0,1))+\
+  scale_x_continuous(breaks = seq(0,max(meltallPostAcuteChik$ageFever),5))+\
+  scale_fill_manual(name = "",\
+                    breaks = c( "acute","allPostAcute"), \
+                     values =c(\
+                       "acute" = Dark2[3],\
+                       "allPostAcute" = "#331832"\
+                               ),\
+                     labels = c("allPostAcute" = "Post-Acute",\
+                               "acute" = "Acute"))+\
+  scale_color_manual(name = "",\
+                     breaks = c( "acute","allPostAcute"), , \
+                     values =c(\
+                       "acute" = Dark2[3],\
+                       "allPostAcute" = "#331832"\
+                               ),\
+                     labels = c("allPostAcute" = "Post-Acute",\
+                               "acute" = "Acute"))\
+\
+\
+#visualize graph\
+acuteAllChronicGraph\
+\
+#save graph\
+ggsave(filename = \'93~/acuteAllChronicGraph.png",\
+       plot = acuteAllChronicGraph,width = 5, height = 5)\
+\
+#Remove unnecessary datasets/graphs\
+rm(acuteAllChronicGraph)\
+rm(meltallPostAcuteChik)\
+\
+```}

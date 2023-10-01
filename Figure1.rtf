@@ -1,0 +1,85 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2639
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 AmericanTypewriter;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww19760\viewh16020\viewkind1
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Figure 1. Prevalence of post-chikungunya associated arthralgia over time, stratified by age range in years in Managua, Nicaragua (2014-2018). Age trends for the prevalence of post-chikungunya-associated arthralgia depicted using a generalized additive model. A 95% confidence band is shown around the mean trend (A). The prevalence of arthralgia measured across days since fever onset and stratified by age range is depicted using a generalized additive model. Distributed marks at the top indicate the density of patient responses by day since fever onset. Participants were considered as having either acute (<10 days), interim (>10 and <90 days), or chronic (>90 days) disease (B).    \
+\
+```\{r, Figure 1A Prevalence of Pain by Age\}\
+\
+chikPain.AgePrev <- chikDatos.Unique %>% filter(daysSinceFever <= 10)\
+chikPain.AgePrev <- melt(chikPain.AgePrev %>% select(code,ageFever,withPain), c("code", "ageFever"))\
+\
+#First, let's observe both sexes and just the pains, to see how they trend with AGE\
+#chikArthMelt %>%\
+prevalenceOFPainAge <- subset(chikPain.AgePrev)%>%\
+  ggplot(aes(x = ageFever, y = value))+\
+  stat_smooth(color = "#3A1772", fill = "#3A1772",alpha=0.2,\
+              method = "glm", \
+              method.args = list(family = "binomial"), se = TRUE)+\
+  scale_y_continuous( labels = scales::percent, breaks = seq(0,1,0.05))+\
+  scale_x_continuous(breaks = seq(0,55,5))+\
+  theme_fausto()+\
+  xlab("Age")+\
+  ylab("Prevalence of Arthralgia")#+\
+  #scale_color_manual(values = sexPalette,labels = c("0" = "Female", \
+   #                             "1" = "Male"))+\
+  #scale_fill_manual(values = sexPalette,labels = c("0" = "Female", \
+   #                             "1" = "Male"))\
+\
+prevalenceOFPainAge\
+\
+ggsave(filename = "/Users/colin/Library/Mobile Documents/com~apple~CloudDocs/UCBerkeley/Student/Harris lab/Epi Project/R Files/FiguresEpi/prevalenceOFPainAge.png",\
+       plot = prevalenceOFPainAge,width = 4, height = 6)\
+\
+\
+#Remove unnecessary datasets/graphs\
+rm(chikPain.AgePrev)\
+rm(prevalenceOFPainAge)\
+\
+```\
+\
+```\{r, Figure 1B painOverTime\}\
+\
+painOverTime.gam <- chikDatos %>%\
+  ggplot()+\
+  stat_smooth(aes(x = daysSinceFever , y = withPain, color = ageRange),\
+              se = F,\
+              alpha=0.2, \
+              method = "gam", \
+              formula = y ~ s(x, bs = "tp", k = 1), \
+              method.args = list(family = "binomial", method ="REML"))+\
+  theme_fausto() +\
+  xlab("Days Post-fever Onset")+\
+  ylab("Prevalence of Arthralgia ")+\
+  labs(color="Age Range")+\
+  scale_y_continuous(labels = scales::percent, limits = c(-0.1,1.05), breaks = seq(0,1,0.1), expand = c(0,0))+\
+  scale_x_continuous(breaks = seq(0, max(chikDatos$daysSinceFever)+1, 50))+\
+  geom_vline(aes(xintercept = 10,color= "Acute"), linetype="solid",color = "Black", size = 0.4)+  \
+  geom_vline(aes(xintercept = 90,color = "Post-acute"), linetype="solid",color = "Black", size = 0.4)+\
+  geom_text(aes(x=10, label="\\nAcute Cutoff", y= 0.015), colour="#ff6150", angle=90, size=3.2) +\
+  geom_text(aes(x=90, label="\\nInterim Cutoff", y=0.020), colour="#1ac0c6", angle=90, size=3.2)+\
+  geom_text(aes(x=175, label="\\nChronic phase ", y=-0.04), colour="#134e6f", size=3.5)+\
+  geom_segment(aes(x = 225, y = -0.075, xend = 285, yend = -0.075), colour="#134e6f",\
+                  arrow = arrow(length = unit(0.1, "cm"))) + \
+  scale_color_manual(name = "Age Range", labels = c("0-4","5-9","10-15","16+"), \
+                    values =c("0-4" = ageGroupsColor[1],\
+                              "5-9" = ageGroupsColor[2],\
+                              "10-15" = ageGroupsColor[3],\
+                              "16+" = ageGroupsColor[4]) )+\
+  geom_rug(aes(x = daysSinceFever, y = withPain),sides = "t",alpha = 0.5, color = "#253494")\
+\
+#visualize graph\
+painOverTime.gam\
+\
+\
+#save graph\
+ggsave(filename = "/Users/colin/Library/Mobile Documents/com~apple~CloudDocs/UCBerkeley/Student/Harris lab/Epi Project/R Files/FiguresEpi/painOverTime.gam.png",\
+       plot = painOverTime.gam, height = 6, width = 8)\
+\
+#Remove unnecessary datasets/graphs\
+rm(painOverTime.gam)\
+\
+```}

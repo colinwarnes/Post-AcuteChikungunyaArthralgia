@@ -1,0 +1,50 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2639
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 AmericanTypewriter;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww19760\viewh16580\viewkind1
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Table 2. Risk factors for acute chikungunya-associated arthralgia in Managua, Nicaragua (2014-2018).\
+\
+\
+```\{r, Odds Ratio Table 2 (Odds for age and sex)\}\
+\
+\
+##We will omit those without acute data for this data, to more fairly summarize the proportion with acutephase pain\
+##Since the chikDatos.Unique dataset is organized to keep a participants earliest visit, we can take advantage of that here. \
+table(subset(chikDatos.Unique, daysSinceFever <= 10)$ageRange, \
+      subset(chikDatos.Unique, daysSinceFever <= 10)$withPain)\
+prop.table(table(subset(chikDatos.Unique, daysSinceFever <= 10)$ageRange,\
+                 subset(chikDatos.Unique, daysSinceFever <= 10)$withPain)[1,])*100\
+prop.table(table(subset(chikDatos.Unique, daysSinceFever <= 10)$ageRange,\
+                 subset(chikDatos.Unique, daysSinceFever <= 10)$withPain)[2,])*100\
+prop.table(table(subset(chikDatos.Unique, daysSinceFever <= 10)$ageRange,\
+                 subset(chikDatos.Unique, daysSinceFever <= 10)$withPain)[3,])*100\
+prop.table(table(subset(chikDatos.Unique, daysSinceFever <= 10)$ageRange,\
+                 subset(chikDatos.Unique, daysSinceFever <= 10)$withPain)[4,])*100\
+\
+#Odds ratio for pain by ageRanges\
+tidy(glm(withPain ~ ageRange, subset(chikDatos.Unique, daysSinceFever <= 10), family = "binomial"), exponentiate = T, conf.int = T)\
+\
+##Sex\
+chikDatos.Unique$sex <- relevel(chikDatos.Unique$sex, ref = "1")\
+#only acute\
+table(subset(chikDatos.Unique, daysSinceFever <= 10)$sex,\
+      subset(chikDatos.Unique, daysSinceFever <= 10)$withPain)\
+prop.table(table(subset(chikDatos.Unique, daysSinceFever <= 10)$sex,\
+                 subset(chikDatos.Unique, daysSinceFever <= 10)$withPain)[1,])*100\
+prop.table(table(subset(chikDatos.Unique, daysSinceFever <= 10)$sex,\
+                 subset(chikDatos.Unique, daysSinceFever <= 10)$withPain)[2,])*100\
+\
+\
+#Table 2, Odds of pain between sex\
+tidy(glm(withPain ~ sex, subset(chikDatos.Unique, daysSinceFever <= 10), family = "binomial"), exponentiate = T, conf.int = T)\
+#Odds of pain between sex, only Pediatric\
+tidy(glm(withPain ~ sex, subset(chikDatos.Unique, daysSinceFever <= 10 & ageRange != "16+"), family = "binomial"), exponentiate = T, conf.int = T)\
+#Only adults, had to use the Firth's correction \
+model.adult.sex <- logistf(withPain ~ sex, data = subset(chikDatos.Unique, daysSinceFever <= 10 & ageRange == "16+"))\
+summary(model.adult.sex)\
+\
+\
+```}
