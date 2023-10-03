@@ -42,3 +42,59 @@ library(SurvRegCensCov)\
 \
 \
 ```}
+
+##HERE ARE THE FUNCTIONS FOR GGPLOT AND PALETTEs THAT I USED
+```{r Functions, include= T}
+#theme for graphs, very clean and from Fausto (thanks, Fausto ^(^.^)> ). Some minor personal edits. 
+theme_fausto <- function(){
+  theme_bw() + 
+    theme(strip.background = element_rect(fill="white"),
+        panel.grid.minor.x = element_blank(),
+          panel.grid.minor.y = element_blank(),
+          legend.position = "bottom",
+          plot.title = element_text(size = 16, face = "bold"),
+          axis.title = element_text(size = 14, face = "bold"),
+          axis.text=element_text(size=12),
+          strip.text = element_text(size = 13),
+          legend.text = element_text(size = 12), 
+          legend.title = element_text(size = 12, face = "bold"),
+          legend.margin = margin(unit(0,"cm")), 
+          strip.text.x = element_text(margin = margin(0.5, 0, 0.5, 0, "mm")))
+}
+
+#Tells you how many missing values you have
+#Regular table function requires "if any" and does not give total. thx Fausto.
+table2 <- function(x){
+  vec <- length(x)
+  names(vec) <- "Total"
+  c(table(x, useNA = "ifany"), vec)
+}
+
+```
+
+```{r palettes, include= F}
+#These two in theory are colorblind safe
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+#Longer version of a colorblind pallet
+cbPalette2 <- c("#000000","#004949","#009292","#ff6db6","#ffb6db","#490092","#006ddb","#b66dff","#6db6ff","#b6dbff","#920000","#924900","#db6d00","#24ff24","#ffff6d")
+
+#Pallettes that I use for the flaviviruses, DENV1-4 the first 4. 
+flaviPalette <- brewer.pal(12, "Set3")
+Dark2 <- c("#134e6f","#1ac0c6","#ff6150")
+bluPurp<- c("#bfd3e6","#9ebcda","#8c96c6","#8c6bb1","#88419d","#810f7c","#4d004b")
+
+#Consistent colors used for the paper. 
+ageGroupsColor = c("#ADFCF9","#FCB1A6","#C94277","#3A1772")
+#Order: 0-4, 5-9, 10-15, 16+
+ageGroupsColorRev = rev(ageGroupsColor) #Reversed
+
+#Colors used for (female, male). 
+sexPalette <- c("#ADFCF9", "#3A1772")
+#Outbreaks (first, second)
+outbreakColor <- c("#41b6c4","#440154")
+
+#Colors for the different joints. (torso, hands, legs, and black if needed)
+jointColor <- c("#134e6f","#1ac0c6","#ff6150", "#000000")
+
+```
